@@ -205,30 +205,33 @@ def lambda_handler(event, context):
             else:
                 strEndTime = "None given"
             
-            if diff_dates(strUpdate, now) < int(intHours):
-                try:
-                    response = HealthIssuesTable.get_item(
-                        Key = {
-                            'arn' : strArn
-                        }
-                )
-                except ClientError as e:
-                    print(e.response['Error']['Message'])
-                else:
-                    isItemResponse = response.get('Item')
-                    if isItemResponse == None:
-                        print (datetime.now().strftime(strDTMFormat2)+": record not found")
-                        update_ddb(HealthIssuesTable, strArn, strUpdate, now, intHours)
-                        affectedAccounts = get_healthAccounts (awshealth, event, strArn, awsRegion)
-                        healthUpdates = get_healthUpdates(awshealth, event, strArn, awsRegion, affectedAccounts)
-                        affectedEntities = get_healthEntities(awshealth, event, strArn, awsRegion, affectedAccounts)
-                        send_webhook(datetime.now().strftime(strDTMFormat2), strStartTime, strEndTime, event, awsRegion, decodedWebHook, healthUpdates, affectedAccounts, affectedEntities)
-                    else:
-                        item = response['Item']
-                        if item['lastUpdatedTime'] != strUpdate:
-                          print (datetime.now().strftime(strDTMFormat2)+": last Update is different")
-                          update_ddb(HealthIssuesTable, strArn, strUpdate, now, intHours)
-                          affectedAccounts = get_healthAccounts (awshealth, event, strArn, awsRegion)                      
-                          healthUpdates = get_healthUpdates(awshealth, event, strArn, awsRegion, affectedAccounts)
-                          affectedEntities = get_healthEntities(awshealth, event, strArn, awsRegion, affectedAccounts)
-                          send_webhook(datetime.now().strftime(strDTMFormat2), strStartTime, strEndTime, event, awsRegion, decodedWebHook, healthUpdates, affectedAccounts, affectedEntities)
+#            if diff_dates(strUpdate, now) < int(intHours):
+            try:
+                response = HealthIssuesTable.get_item(
+                    Key = {
+                        'arn' : strArn
+                    }
+            )
+            except ClientError as e:
+                print(e.response['Error']['Message'])
+            #else:
+            try:
+                isItemResponse = response.get('Item')
+            except:
+                pass
+            if isItemResponse == None:
+                print (datetime.now().strftime(strDTMFormat2)+": record not found")
+                update_ddb(HealthIssuesTable, strArn, strUpdate, now, intHours)
+                affectedAccounts = get_healthAccounts (awshealth, event, strArn, awsRegion)
+                healthUpdates = get_healthUpdates(awshealth, event, strArn, awsRegion, affectedAccounts)
+                affectedEntities = get_healthEntities(awshealth, event, strArn, awsRegion, affectedAccounts)
+                send_webhook(datetime.now().strftime(strDTMFormat2), strStartTime, strEndTime, event, awsRegion, decodedWebHook, healthUpdates, affectedAccounts, affectedEntities)
+            else:
+                item = response['Item']
+                if item['lastUpdatedTime'] != strUpdate:
+                  print (datetime.now().strftime(strDTMFormat2)+": last Update is different")
+                  update_ddb(HealthIssuesTable, strArn, strUpdate, now, intHours)
+                  affectedAccounts = get_healthAccounts (awshealth, event, strArn, awsRegion)                      
+                  healthUpdates = get_healthUpdates(awshealth, event, strArn, awsRegion, affectedAccounts)
+                  affectedEntities = get_healthEntities(awshealth, event, strArn, awsRegion, affectedAccounts)
+                  send_webhook(datetime.now().strftime(strDTMFormat2), strStartTime, strEndTime, event, awsRegion, decodedWebHook, healthUpdates, affectedAccounts, affectedEntities)
