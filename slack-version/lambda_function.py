@@ -235,3 +235,6 @@ def lambda_handler(event, context):
                   healthUpdates = get_healthUpdates(awshealth, event, strArn, awsRegion, affectedAccounts)
                   affectedEntities = get_healthEntities(awshealth, event, strArn, awsRegion, affectedAccounts)
                   send_webhook(datetime.now().strftime(strDTMFormat2), strStartTime, strEndTime, event, awsRegion, decodedWebHook, healthUpdates, affectedAccounts, affectedEntities)
+                else:
+                    print(strArn)
+                    print("Skipped duplicate record")
